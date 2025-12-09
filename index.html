@@ -232,14 +232,28 @@
             const timestamp = new Date().toLocaleString();
             
             // Create formatted text
-            let textContent = `WAYFINDING TEST DATA\n====================\n\n`;
-            textContent += `Timestamp: ${timestamp}\n\n`;
-            
-            for (const [key, value] of Object.entries(data)) {
-                textContent += `${formatLabel(key)}: ${decodeURIComponent(value)}\n`;
-            }
-            
-            textContent += `\n====================\n`;
+const textContent = `
+WAYFINDING TEST DATA
+====================
+
+Timestamp: ${timestamp}
+
+PERSONALITY RESULTS
+-------------------
+Personality Type: ${decodeURIComponent(data.personality || 'N/A')}
+Specialty: ${decodeURIComponent(data.specialty || 'N/A')}
+
+ADDITIONAL INFORMATION
+----------------------
+Test Version: 1.0
+School: Temasek Polytechnic
+Course: Designer Personality Assessment
+
+Thank you for participating in this wayfinding test!
+For questions, contact: yourname@email.com
+
+====================
+`;
             
             // Create download
             const blob = new Blob([textContent], { type: 'text/plain' });
