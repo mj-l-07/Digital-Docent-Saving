@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wayfinding Test - Data Download</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .data-section {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .data-row {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .data-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: #333;
+            min-width: 150px;
+        }
+        
+        .data-value {
+            color: #666;
+            flex: 1;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success-message {
+            display: none;
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📍 Your Test Results</h1>
+        <p class="subtitle">Your wayfinding test data has been captured. Review it below and download when ready.</p>
+        
+        <div class="instructions" id="instructions">
+            <h3>⚠️ No Data Detected</h3>
+            <p>Make sure you clicked the correct link from the Figma prototype. The link should contain your test data in the URL.</p>
+        </div>
+        
+        <div class="data-section" id="dataDisplay">
+            <div class="no-data" id="noData">
+                No test data found in the URL. Please use the link provided at the end of the Figma prototype.
+            </div>
+            <div id="dataContent" style="display: none;"></div>
+        </div>
+        
+        <button id="downloadBtn" disabled>💾 Download My Data</button>
+        <button id="autoDownloadBtn" style="display: none; background: #4caf50;">⚡ Auto-Download Enabled</button>
+        
+        <div class="success-message" id="successMessage">
+            ✅ Your data has been downloaded successfully!
+        </div>
+    </div>
+    
+    <script>
+        // Parse URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const data = {};
+            
+            for (const [key, value] of params) {
+                data[key] = value;
+            }
+            
+            return data;
+        }
+        
+        // Format parameter names to be readable
+        function formatLabel(key) {
+            return key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .trim();
+        }
+        
+        // Display the data
+        function displayData(data) {
+            if (Object.keys(data).length === 0) {
+                return false;
+            }
+            
+            const dataContent = document.getElementById('dataContent');
+            let html = '';
+            
+            // Add timestamp
+            const timestamp = new Date().toLocaleString();
+            html += `
+                <div class="data-row">
+                    <div class="data-label">Timestamp:</div>
+                    <div class="data-value">${timestamp}</div>
+                </div>
+            `;
+            
+            // Add each parameter
+            for (const [key, value] of Object.entries(data)) {
+                html += `
+                    <div class="data-row">
+                        <div class="data-label">${formatLabel(key)}:</div>
+                        <div class="data-value">${decodeURIComponent(value)}</div>
+                    </div>
+                `;
+            }
+            
+            dataContent.innerHTML = html;
+            dataContent.style.display = 'block';
+            document.getElementById('noData').style.display = 'none';
+            document.getElementById('instructions').style.display = 'none';
+            document.getElementById('downloadBtn').disabled = false;
+            
+            return true;
+        }
+        
+        // Download the data
+        function downloadData() {
+            const data = getUrlParams();
+            const timestamp = new Date().toLocaleString();
+            
+            // Create formatted text
+            let textContent = `WAYFINDING TEST DATA\n====================\n\n`;
+            textContent += `Timestamp: ${timestamp}\n\n`;
+            
+            for (const [key, value] of Object.entries(data)) {
+                textContent += `${formatLabel(key)}: ${decodeURIComponent(value)}\n`;
+            }
+            
+            textContent += `\n====================\n`;
+            
+            // Create download
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wayfinding_test_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            // Show success message
+            document.getElementById('successMessage').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const data = getUrlParams();
+            const hasData = displayData(data);
+            
+            // Auto-download if 'auto=true' parameter is present
+            if (hasData && data.auto === 'true') {
+                document.getElementById('downloadBtn').style.display = 'none';
+                document.getElementById('autoDownloadBtn').style.display = 'block';
+                setTimeout(() => {
+                    downloadData();
+                }, 1000);
+            }
+            
+            document.getElementById('downloadBtn').addEventListener('click', downloadData);
+        });
+    </script>
+</body>
+</html>
